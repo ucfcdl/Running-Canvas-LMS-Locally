@@ -1,6 +1,8 @@
 # Local Canvas Dev Server Setup
 
-Instructions for running a local development server for Canvas LMS. This guide assumes you are running Ubuntu 24.04.1 LTS. **These steps are not intended for use in a production environment.**
+Instructions for running a local development server for Canvas LMS. This guide assumes you are running Ubuntu 24.04.1 LTS and have a domain under which to host the application and Rich Content Editor (RCE). If you do not have a domain handy, you may use the default http://canvas.docker/
+
+**These steps are not intended for use in a production environment.**
 
 ## Table of Contents
 
@@ -18,12 +20,14 @@ Instructions for running a local development server for Canvas LMS. This guide a
   - [Vault Contents](#vault-contents)
   - [Environment Variables](#environment-variables)
 - [Install and configure Rich Content Editor API](#install-and-configure-rich-content-editor-api)
-- [Start Docker/Canvas on instance startup](#start-dockercanvas-on-instance-startup)
+- [Start Docker/Canvas on instance startup](#start-dockercanvas-on-instance-boot)
 - [NGINX](#nginx)
 
 ## Setup Docker
 
 ### Install Docker
+
+You will want to update the list of avialable packages, then upgrade the installed packages. Install the necessary dependencies. Add the Docker GPG key and add the Docker repository to the list of sources. Install Docker, add the current user to the Docker group, and install an older version of docker-compose to work with Instucture's compose V1 commands.
 
 ```sh
 sudo apt-get update
@@ -51,6 +55,8 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 
 ### Set Docker permissions
 
+Set access control lists on the current directory and all its contents, giving user ID and group ID `9999` read/write/execute access. Set default ACL for any new contents in this directory. Create a new group `docker-instructure` with group ID `9999` and add the current user to this group. Set an environment variable to skip the Docker usermod command.
+
 ```sh
 sudo apt install acl
 sudo setfacl -Rm u:9999:rwX,g:9999:rwX .
@@ -62,6 +68,8 @@ export CANVAS_SKIP_DOCKER_USERMOD=1
 ```
 
 ## Setup Swapfile
+
+Enable swap memory and allocate 4GB of swap space, with the proper permissions to read/write with root. This is especially helpful for running the Canvas LMS on an instnce with low RAM allocation, which can be memory intensive.
 
 ```sh
 sudo fallocate -l 4G /swapfile
@@ -98,6 +106,7 @@ Skip dory when prompted (y). For first time setup you will want to copy the defa
 ### Docker Compose Override
 
 Add the domain you want to use to the `VIRTUAL_HOST` env var and set ports to Web Service
+
 `nano docker-compose.override.yml`
 
 ```
@@ -131,6 +140,7 @@ development:
 ### Session Store
 
 Setup the session store in `session_store.yml`
+
 `nano config/session_store.yml`
 
 ```
@@ -157,6 +167,7 @@ test:
 ### Dynamic Settings
 
 Modify the dynamic settings to include the RCE API host. Here we are running under the same domain as the canvas domain, but with the path `/rce`. Replace your-canvas-domain-here.com with your domain.
+
 `nano config/dynamic_settings.yml`
 
 ```
@@ -183,11 +194,12 @@ Create a `vault_contents.yml` from the example one
 COMPOSE_FILE=docker-compose.yml:docker-compose.override.yml:docker-compose/mailcatcher.override.yml:docker-compose/rce-api.override.yml
 ```
 
-Add any additional services you may need.
+This is where you map the compose files for any required services. The above config includes the base settings, mailcatcher, and RCE. Add any additional services you may need.
 
 ## Install and configure Rich Content Editor API
 
 Modify the `rce-api.override.yml` to include the domain you want to use. Replace your-canvas-domain-here.com with your domain.
+
 `nano docker-compose/rce-api.override.yml`
 
 ```
@@ -219,9 +231,9 @@ services:
 
 ```
 
-## Start Docker/Canvas on instance startup
+## Start Docker/Canvas on instance boot
 
-When the server restarts, you will need to start the docker containers. You can do this by creating a systemd service that starts the compose app. This will start both the Canvas LMS and the RCE API.
+When the server restarts, you will need to start the docker containers. You can do this automatically on boot by creating a systemd service that starts the compose app. This will start both the Canvas LMS and the RCE API containers.
 
 ```sh
 sudo tee /etc/systemd/system/docker-compose-app.service << 'EOF'
