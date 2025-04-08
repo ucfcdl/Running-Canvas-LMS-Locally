@@ -284,6 +284,14 @@ server {
     server_name your-canvas-domain-here.com;
 
     proxy_set_header X-Forwarded-Proto "https";
+
+    # Some requests (e.g. gradebook) are large, so increase buffer size and timeout for good measure
+    proxy_buffers 8 1024k;
+    proxy_buffer_size 1024k;
+    proxy_read_timeout 300;
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
+
     # Main Canvas app
     location / {
         proxy_pass http://127.0.0.1:9100;
