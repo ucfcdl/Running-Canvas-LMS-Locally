@@ -27,7 +27,7 @@ Instructions for running a local development server for Canvas LMS. This guide a
 
 ### Install Docker
 
-You will want to update the list of avialable packages, then upgrade the installed packages. Install the necessary dependencies. Add the Docker GPG key and add the Docker repository to the list of sources. Install Docker, add the current user to the Docker group, and install an older version of docker-compose to work with Instucture's compose V1 commands.
+You will want to update the list of available packages, then upgrade the installed packages. Install the necessary dependencies. Add the Docker GPG key and add the Docker repository to the list of sources. Install Docker, add the current user to the Docker group, and install an older version of docker-compose to work with Instucture's compose V1 commands.
 
 ```sh
 sudo apt-get update
@@ -69,7 +69,7 @@ export CANVAS_SKIP_DOCKER_USERMOD=1
 
 ## Setup Swapfile
 
-Enable swap memory and allocate 4GB of swap space, with the proper permissions to read/write with root. This is especially helpful for running the Canvas LMS on an instnce with low RAM allocation, which can be memory intensive.
+Enable swap memory and allocate 4GB of swap space, with the proper permissions to read/write with root. This is especially helpful for running the Canvas LMS on an instance with low RAM allocation, which can be memory intensive.
 
 ```sh
 sudo fallocate -l 4G /swapfile
